@@ -1,6 +1,6 @@
 # Pickup Routes Service
 
-A small web service that helps answer one question: 
+A small web service that helps answer one question:
 **which pickup point is closest to the customer by car, and how long does it take to get there?**
 
 You give it the customer's location and a list of pickup points. It asks the
@@ -13,8 +13,14 @@ You need Node.js 20 or newer.
 
 ```bash
 npm install
-npm run dev                    # development, restarts on changes
-npm run build && npm start     # compiled version (run build and start as separate commands on Windows Powershell versions 5 or older)
+npm run dev        # development, restarts on changes
+```
+
+or the compiled version, as two separate commands:
+
+```bash
+npm run build
+npm start
 ```
 
 The service runs on http://localhost:3000. Try it:
@@ -89,11 +95,12 @@ Where the instructions left room for interpretation, I made these choices.
 
 ## What I found while testing OSRM
 
-I called OSRM by hand before writing any code, and two things surprised me.
+I called OSRM by hand before writing any code, and two things are worth knowing.
 
-1. **The hostname in the assignment does not work.** `router.projectosrm.org`
-   did not resolve when I tested it. The working host is
-   `router.project-osrm.org` (with a hyphen), which is what the service uses.
+1. **Copying the OSRM URL from the PDF gives a hostname that does not resolve.**
+   The URL is split across two lines in the PDF, and when it is copied the
+   hyphen at the line break is lost (`router.projectosrm.org`). The correct
+   host is `router.project-osrm.org`, which is what the service uses.
 2. **OSRM says `"code":"Ok"` for places no one can drive to.** I tried a point
    in the middle of the Atlantic. OSRM moved it to the nearest road, near
    Lisbon about 1,770 km away, and returned a normal-looking route. Trusting
@@ -103,7 +110,9 @@ I called OSRM by hand before writing any code, and two things surprised me.
    To handle this, the service reads how far OSRM had to move each point.
    If it is more than 1,000 m (`MAX_SNAP_DISTANCE_M`), the route is treated as
    unreachable. This also protects against a customer location that is not
-   near any road.
+   near any road. If a response does not include the snap distance (the
+   example in the assignment does not), the check is skipped and the route is
+   used.
 
 Also, the numbers in OSRM's example response differ from what the live server
 returns today, because the map data changes. So the tests never depend on live
@@ -205,6 +214,10 @@ These are in rough order of importance.
    it is not purely internal.
 8. **Shortlist by straight-line distance** when the candidate list is large,
    and only ask OSRM about the closest few.
+9. **Customer location far from any road.** If the source itself is not near a
+   road, every destination is skipped and `routes` comes back empty with a 200.
+   A 422 with a clear message ("source is not near a road") would be more
+   helpful, and it would also save the OSRM calls.
 
 ## How I used AI
 

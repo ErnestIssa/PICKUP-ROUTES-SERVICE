@@ -62,20 +62,17 @@ export function createOsrmClient(options: OsrmClientOptions, fetchImpl: typeof f
     }
 
     const route = data.routes?.[0];
-    const sourceSnap = data.waypoints?.[0]?.distance;
-    const destinationSnap = data.waypoints?.[1]?.distance;
-    if (
-      typeof route?.duration !== "number" ||
-      typeof route.distance !== "number" ||
-      typeof sourceSnap !== "number" ||
-      typeof destinationSnap !== "number"
-    ) {
+    if (typeof route?.duration !== "number" || typeof route.distance !== "number") {
       throw new UpstreamError("OSRM response is missing expected fields", "bad_response");
     }
 
     // OSRM moves each point to the nearest road and still says "Ok", even when
     // that road is far away (e.g. a point in the ocean). Do not trust those routes.
-    const worstSnap = Math.max(sourceSnap, destinationSnap);
+    // The snap distance is optional: if OSRM does not send it, the check is skipped.
+    const snapDistances = (data.waypoints ?? [])
+      .map((waypoint) => waypoint.distance)
+      .filter((distance): distance is number => typeof distance === "number");
+    const worstSnap = snapDistances.length > 0 ? Math.max(...snapDistances) : 0;
     if (worstSnap > options.maxSnapDistanceM) {
       return unroutable(`point is ${Math.round(worstSnap)} m from the nearest road`);
     }

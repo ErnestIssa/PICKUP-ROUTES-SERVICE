@@ -9,7 +9,7 @@ let config;
 try {
   config = loadConfig();
 } catch (error) {
-  logger.error("Invalid configuration", { message: error instanceof Error ? error.message : String(error) });
+  logger.error("Invalid configuration", { error: error instanceof Error ? error.message : String(error) });
   process.exit(1);
 }
 

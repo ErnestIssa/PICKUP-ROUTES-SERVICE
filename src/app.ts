@@ -15,7 +15,7 @@ function createErrorHandler(logger: Logger): ErrorRequestHandler {
     }
 
     if (error instanceof UpstreamError) {
-      logger.error("OSRM request failed", { kind: error.kind, message: error.message });
+      logger.error("OSRM request failed", { kind: error.kind, error: error.message });
       res
         .status(error.kind === "timeout" ? 504 : 502)
         .json({ error: "The routing service is unavailable, please try again later" });
@@ -24,7 +24,7 @@ function createErrorHandler(logger: Logger): ErrorRequestHandler {
 
     // Unknown problem: log the details, but do not leak them to the caller.
     logger.error("Unexpected error", {
-      message: error instanceof Error ? error.message : String(error),
+      error: error instanceof Error ? error.message : String(error),
     });
     res.status(500).json({ error: "Internal server error" });
   };

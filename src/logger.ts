@@ -11,7 +11,7 @@ export function createJsonLogger(write: (line: string) => void = console.log): L
   const log =
     (level: string) =>
     (message: string, fields: LogFields = {}) =>
-      write(JSON.stringify({ time: new Date().toISOString(), level, message, ...fields }));
+      write(JSON.stringify({ ...fields, time: new Date().toISOString(), level, message }));
 
   return { info: log("info"), warn: log("warn"), error: log("error") };
 }

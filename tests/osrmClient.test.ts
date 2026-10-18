@@ -121,3 +121,15 @@ describe("osrmClient.getRoute", () => {
     expect(fetchMock).toHaveBeenCalledTimes(1);
   });
 });
+
+
+  it("still works when OSRM does not report snap distances", async () => {
+    const { fetchMock, client } = setup();
+    fetchMock.mockResolvedValueOnce(
+      jsonResponse({ code: "Ok", routes: [{ duration: 465.2, distance: 1879.4 }] }),
+    );
+
+    const result = await client.getRoute(source, destination);
+
+    expect(result).toEqual({ status: "ok", duration: 465.2, distance: 1879.4 });
+  });
