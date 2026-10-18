@@ -14,7 +14,7 @@ You need Node.js 20 or newer.
 ```bash
 npm install
 npm run dev                    # development, restarts on changes
-npm run build && npm start     # compiled version
+npm run build && npm start     # compiled version (run build and start as separate commands on Windows Powershell versions 5 or older)
 ```
 
 The service runs on http://localhost:3000. Try it:
