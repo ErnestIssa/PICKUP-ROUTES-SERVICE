@@ -111,17 +111,6 @@ describe("osrmClient.getRoute", () => {
     expect(fetchMock).toHaveBeenCalledTimes(1);
   });
 
-  it("does not retry an unexpected OSRM code", async () => {
-    const { fetchMock, client } = setup();
-    fetchMock.mockResolvedValue(jsonResponse({ code: "InvalidQuery" }, 400));
-
-    await expect(client.getRoute(source, destination)).rejects.toMatchObject({
-      kind: "bad_response",
-    });
-    expect(fetchMock).toHaveBeenCalledTimes(1);
-  });
-});
-
 
   it("still works when OSRM does not report snap distances", async () => {
     const { fetchMock, client } = setup();
@@ -133,3 +122,15 @@ describe("osrmClient.getRoute", () => {
 
     expect(result).toEqual({ status: "ok", duration: 465.2, distance: 1879.4 });
   });
+
+  it("does not retry an unexpected OSRM code", async () => {
+    const { fetchMock, client } = setup();
+    fetchMock.mockResolvedValue(jsonResponse({ code: "InvalidQuery" }, 400));
+
+    await expect(client.getRoute(source, destination)).rejects.toMatchObject({
+      kind: "bad_response",
+    });
+    expect(fetchMock).toHaveBeenCalledTimes(1);
+  });
+});
+
